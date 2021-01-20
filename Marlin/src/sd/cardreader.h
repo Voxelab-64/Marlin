@@ -63,6 +63,8 @@ public:
   static char filename[FILENAME_LENGTH],            // DOS 8.3 filename of the selected item
               longFilename[LONG_FILENAME_LENGTH];   // Long name of the selected item
 
+  static int32_t CreateTime;
+  static int32_t CreateData;
   // Fast! binary file transfer
   #if ENABLED(BINARY_FILE_TRANSFER)
     #if HAS_MULTI_SERIAL
@@ -132,7 +134,6 @@ public:
     static inline uint16_t permyriadDone() { return (isFileOpen() && filesize) ? sdpos / ((filesize + 9999) / 10000) : 0; }
   #endif
   static inline uint8_t percentDone() { return (isFileOpen() && filesize) ? sdpos / ((filesize + 99) / 100) : 0; }
-
   // Helper for open and remove
   static const char* diveToFile(const bool update_cwd, SdFile*& curDir, const char * const path, const bool echo=false);
 

@@ -41,6 +41,9 @@
   #include "../../feature/powerloss.h"
 #endif
 
+#if ENABLED(DWIN_CREALITY_LCD)
+  #include "../../lcd/dwin/dwin.h"
+#endif
 #include "../../MarlinCore.h" // for startOrResumeJob
 
 /**
@@ -64,8 +67,9 @@ void GcodeSuite::M24() {
     card.startFileprint();            // SD card will now be read for commands
     startOrResumeJob();               // Start (or resume) the print job timer
     TERN_(POWER_LOSS_RECOVERY, recovery.prepare());
+    
   }
-
+   TERN_(DWIN_CREALITY_LCD, Filament_Recovery_Flag());
   #if ENABLED(HOST_ACTION_COMMANDS)
     #ifdef ACTION_ON_RESUME
       host_action_resume();

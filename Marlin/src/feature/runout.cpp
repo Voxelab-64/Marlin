@@ -96,7 +96,7 @@ void event_filament_runout() {
   #endif
 
   TERN_(EXTENSIBLE_UI, ExtUI::onFilamentRunout(ExtUI::getActiveTool()));
-
+  
   #if EITHER(HOST_PROMPT_SUPPORT, HOST_ACTION_COMMANDS)
     const char tool = '0'
       #if NUM_RUNOUT_SENSORS > 1

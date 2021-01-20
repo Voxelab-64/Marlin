@@ -84,14 +84,6 @@ void Encoder_Configuration(void) {
     SET_OUTPUT(LED);
     #endif
 }
-unsigned char Trg;
-unsigned char Cont;
-void KeyRead(void)
-{
-  unsigned char ReadData = (READ(BTN_ENC))^0x01;   // 1
-  Trg = ReadData & (ReadData ^ Cont);      // 2
-  Cont = ReadData;                                // 3
-}
 
 millis_t next_click_update_ms;
 /*接收数据解析 返回值:ENCODER_DIFF_NO,无状态; ENCODER_DIFF_CW,顺时针旋转; ENCODER_DIFF_CCW,逆时针旋转; ENCODER_DIFF_ENTER,按下*/
@@ -100,17 +92,30 @@ ENCODER_DiffState Encoder_ReceiveAnalyze(void) {
   static unsigned char lastEncoderBits;
   unsigned char newbutton = 0;
   static signed char temp_diff = 0;
-  static int8_t press_up_cnt=0;
+ static int8_t press_up_cnt=0;
   ENCODER_DiffState temp_diffState = ENCODER_DIFF_NO;
   if (BUTTON_PRESSED(EN1)) newbutton |= 0x01;
   if (BUTTON_PRESSED(EN2)) newbutton |= 0x02;
+  // if (BUTTON_PRESSED(ENC)) {
+  //   // if (ELAPSED(now, next_click_update_ms)) { 
+  //   //   next_click_update_ms = millis() + 300;
+  //   //   Encoder_tick();
+  //   //   #if PIN_EXISTS(LCD_LED)
+  //   //     //LED_Action();
+  //   //   #endif
+  //   //   const bool was_waiting = wait_for_user;
+  //   //   wait_for_user = false;
+  //   //   return was_waiting ? ENCODER_DIFF_NO : ENCODER_DIFF_ENTER;
+  //   // }
+  //   // else return ENCODER_DIFF_NO;  
+
+  // }
   if(BUTTON_PRESSED(ENC))
   {
       press_up_cnt++; 
       delay(1);
       if(press_up_cnt>100)
       {
-          //SERIAL_ECHOLNPAIR("8888888888enter",press_up_cnt); 
           press_up_cnt=0;
           Encoder_tick();
           #if PIN_EXISTS(LCD_LED)
@@ -120,13 +125,11 @@ ENCODER_DiffState Encoder_ReceiveAnalyze(void) {
           wait_for_user = false; 
           return  ENCODER_DIFF_ENTER;
       }
-  }
+  } 
   else
   {
     press_up_cnt=0;
-    //return ENCODER_DIFF_NO;
   }
- 
   if (newbutton != lastEncoderBits) {
     switch (newbutton) {
       case ENCODER_PHASE_0: {

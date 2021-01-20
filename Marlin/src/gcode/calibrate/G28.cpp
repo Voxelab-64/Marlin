@@ -356,26 +356,26 @@ void GcodeSuite::G28() {
       #else
 
         homeaxis(X_AXIS);
-
+       
       #endif
     }
 
     // Home Y (after X)
     if (DISABLED(HOME_Y_BEFORE_X) && doY)
       homeaxis(Y_AXIS);
-
+  
     TERN_(IMPROVE_HOMING_RELIABILITY, end_slow_homing(slow_homing));
 
     // Home Z last if homing towards the bed
     #if Z_HOME_DIR < 0
-
+     
       if (doZ) {
         TERN_(BLTOUCH, bltouch.init());
-
+     
         TERN(Z_SAFE_HOMING, home_z_safely(), homeaxis(Z_AXIS));
-
+              
         probe.move_z_after_homing();
-
+         
       } // doZ
 
     #endif // Z_HOME_DIR < 0

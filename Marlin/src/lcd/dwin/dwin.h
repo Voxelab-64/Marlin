@@ -60,6 +60,9 @@ enum processID {
   // Last Process ID
   Last_Prepare,
   Last_Control,
+  Bltouch,
+  filament,
+  filament_exist,
   // Back Process ID
   Back_Main,
   Back_Print,
@@ -96,6 +99,7 @@ enum processID {
 // ICON ID
 #define ICON                      0x09
 #define ICON1                      0X06
+#define ICON2                      0x03
 #define ICON_LOGO                  0
 #define ICON_Print_0               1
 #define ICON_Print_1               2
@@ -274,10 +278,15 @@ typedef struct {
 extern HMI_value_t HMI_ValueStruct;
 extern HMI_Flag    HMI_flag;
 
+extern uint8_t filament_flag;
 // Language
 void lcd_select_language(void);
 void set_english_to_eeprom(void);
 void set_chinese_to_eeprom(void);
+
+void filament_flag_select(void);
+void set_no_filament(void);
+void set_filament(void);
 
 // Show ICO
 void ICON_Print(bool show);
@@ -371,3 +380,5 @@ void DWIN_CompletedHoming(void);
 void DWIN_CompletedLeveling(void);
 void DWIN_CompletedMatic(void);
 void DWIN_CompletedMaticHate(void);
+void BLtouch_detecting(int x,int y);
+void Filament_Recovery_Flag(void);

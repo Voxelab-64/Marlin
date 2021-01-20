@@ -68,7 +68,7 @@
 //
 // Servos
 //
-//#define SERVO0_PIN                          PB0   // BLTouch OUT
+#define SERVO0_PIN                          PB0  // BLTouch OUT
 
 //
 // Limit Switches
@@ -78,7 +78,7 @@
 #define Z_STOP_PIN                          PA7
 
 //#define Z_PROBE_PIN                         PB1   // BLTouch IN
-
+#define Z_MIN_PROBE_PIN                     PB1   // BLTouch IN
 //
 // Filament Runout Sensor
 //
@@ -137,7 +137,7 @@
 #define LED                                PC0
 
 // Ignore temp readings during development.
-// #define BOGUS_TEMPERATURE_GRACE_PERIOD 2000
+ //#define BOGUS_TEMPERATURE_GRACE_PERIOD 2000
 //
 // Power Loss Detection
 //

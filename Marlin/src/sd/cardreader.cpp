@@ -56,7 +56,8 @@
 card_flags_t CardReader::flag;
 char CardReader::filename[FILENAME_LENGTH], CardReader::longFilename[LONG_FILENAME_LENGTH];
 int8_t CardReader::autostart_index;
-
+int32_t CardReader::CreateTime;
+int32_t CardReader::CreateData;
 #if BOTH(HAS_MULTI_SERIAL, BINARY_FILE_TRANSFER)
   int8_t CardReader::transfer_port_index;
 #endif
@@ -156,6 +157,16 @@ char *createFilename(char * const buffer, const dir_t &p) {
   return buffer;
 }
 
+int32_t createFileCreatedata(int32_t CreateData,const dir_t &p)
+{
+    CreateData = p.creationDate;
+    return CreateData;
+}
+int32_t createFileCreatetime(int32_t Createtime,const dir_t &p)
+{
+    Createtime = p.creationTime;
+    return Createtime;
+}
 //
 // Return 'true' if the item is a folder or G-code file
 //
@@ -216,6 +227,8 @@ void CardReader::selectByIndex(SdFile dir, const uint8_t index) {
     if (is_dir_or_gcode(p)) {
       if (cnt == index) {
         createFilename(filename, p);
+        createFileCreatetime(CreateTime,p);
+        createFileCreatedata(CreateData,p);
         return;  // 0 based index
       }
       cnt++;
@@ -846,7 +859,7 @@ void CardReader::cd(const char * relpath) {
 int8_t CardReader::cdup() {
   if (workDirDepth > 0) {                                               // At least 1 dir has been saved
     workDir = --workDirDepth ? workDirParents[workDirDepth - 1] : root; // Use parent, or root if none
-    TERN_(SDCARD_SORT_ALPHA, presort());
+    //TERN_(SDCARD_SORT_ALPHA, presort());
   }
   if (!workDirDepth) flag.workDirIsRoot = true;
   return workDirDepth;
@@ -855,7 +868,7 @@ int8_t CardReader::cdup() {
 void CardReader::cdroot() {
   workDir = root;
   flag.workDirIsRoot = true;
-  TERN_(SDCARD_SORT_ALPHA, presort());
+  //TERN_(SDCARD_SORT_ALPHA, presort());
 }
 
 #if ENABLED(SDCARD_SORT_ALPHA)
@@ -867,7 +880,6 @@ void CardReader::cdroot() {
     selectFileByIndex(TERN1(SDSORT_GCODE, sort_alpha) && (nr < sort_count)
       ? sort_order[nr] : nr);
   }
-
   #if ENABLED(SDSORT_USES_RAM)
     #if ENABLED(SDSORT_DYNAMIC_RAM)
       // Use dynamic method to copy long filename
@@ -906,7 +918,7 @@ void CardReader::cdroot() {
    *  - Most RAM: Buffer the directory and return filenames from RAM
    */
   void CardReader::presort() {
-
+    
     // Throw away old sort index
     flush_presort();
 
@@ -920,7 +932,6 @@ void CardReader::cdroot() {
       // Never sort more than the max allowed
       // If you use folders to organize, 20 may be enough
       NOMORE(fileCnt, uint16_t(SDSORT_LIMIT));
-
       // Sort order is always needed. May be static or dynamic.
       TERN_(SDSORT_DYNAMIC_RAM, sort_order = new uint8_t[fileCnt]);
 
@@ -953,7 +964,10 @@ void CardReader::cdroot() {
         // retaining only two filenames at a time. This is very
         // slow but is safest and uses minimal RAM.
         char name1[LONG_FILENAME_LENGTH];
-
+        char cre_data1[SDSORT_LIMIT];
+        char cre_time1[SDSORT_LIMIT];
+        char cre_data2[SDSORT_LIMIT];
+        char cre_time2[SDSORT_LIMIT];
       #endif
 
       if (fileCnt > 1) {
@@ -984,6 +998,7 @@ void CardReader::cdroot() {
           #if DISABLED(SDSORT_USES_RAM)
             selectFileByIndex(o1);              // Pre-fetch the first entry and save it
             strcpy(name1, longest_filename());  // so the loop only needs one fetch
+            sprintf(cre_data1,"%d",CreateData);
             TERN_(HAS_FOLDER_SORTING, bool dir1 = flag.filenameIsDir);
           #endif
 
@@ -995,6 +1010,8 @@ void CardReader::cdroot() {
               #define _SORT_CMP_NODIR() (strcasecmp(sortnames[o1], sortnames[o2]) > 0)
             #else
               #define _SORT_CMP_NODIR() (strcasecmp(name1, name2) > 0)
+              #define _SORT_CMP_DATA()  (strcasecmp(cre_data1, cre_data2)  > 0)
+              #define _SORT_CMP_TIME()  (strcasecmp(cre_time1,cre_time2)  > 0)
             #endif
 
             #if HAS_FOLDER_SORTING
@@ -1012,6 +1029,7 @@ void CardReader::cdroot() {
               selectFileByIndex(o2);
               const bool dir2 = flag.filenameIsDir;
               char * const name2 = longest_filename(); // use the string in-place
+              sprintf(cre_data2,"%d",CreateData);
             #endif // !SDSORT_USES_RAM
 
             // Sort the current pair according to settings.
@@ -1031,8 +1049,17 @@ void CardReader::cdroot() {
               sort_order[j] = o2;
               sort_order[j + 1] = o1;
               didSwap = true;
+
+              //  o1 = o2;
+              // #if DISABLED(SDSORT_USES_RAM)
+              //   TERN_(HAS_FOLDER_SORTING, dir1 = dir2);
+              //   strcpy(name1, name2);
+              // #endif
             }
             else {
+                // sort_order[j] = o2;
+                // sort_order[j + 1] = o1;
+                // didSwap = true;
               // The next o1 is the current o2. No new fetch needed.
               o1 = o2;
               #if DISABLED(SDSORT_USES_RAM)
@@ -1140,7 +1167,6 @@ void CardReader::fileHasFinished() {
 
   bool CardReader::jobRecoverFileExists() {
     const bool exists = recovery.file.open(&root, recovery.filename, O_READ);
-     SERIAL_ECHOLNPAIR("jobRecoverFileExists: ",exists);
     if (exists) recovery.file.close();
     return exists;
   }

@@ -27,9 +27,12 @@
 typedef unsigned char BLTCommand;
 
 #if ENABLED(CREALITY_TOUCH)
-  #define STOW_ALARM         false
-  #define BLTOUCH_DEPLOY       170
-  #define BLTOUCH_STOW          20
+  // #define STOW_ALARM         false
+  // #define BLTOUCH_DEPLOY       170
+  // #define BLTOUCH_STOW          20
+  #define STOW_ALARM          true
+  #define BLTOUCH_DEPLOY        10
+  #define BLTOUCH_STOW          90
 #else
   #define STOW_ALARM          true
   #define BLTOUCH_DEPLOY        10

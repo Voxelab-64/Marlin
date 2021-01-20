@@ -240,7 +240,13 @@ static void NVIC_SetPriorityGrouping(uint32_t PriorityGroup) {
   } }
 #endif
 
+void NVIC_SetVectorTable(uint32_t NVIC_VectTab,uint32_t Offset)
+{
+  SCB->VTOR =NVIC_VectTab |(Offset&(uint32_t)0x1fffff80);
+}
+
 void HAL_init() {
+  //NVIC_SetVectorTable(0x08000000,0x08007000);
   NVIC_SetPriorityGrouping(0x3);
   #if PIN_EXISTS(LED)
     OUT_WRITE(LED_PIN, LOW);
@@ -320,6 +326,7 @@ extern "C" {
 // Init the AD in continuous capture mode
 void HAL_adc_init() {
   // configure the ADC
+ for(int i=0;i<0x1000;i++)
  
   adc.calibrate();
   #if F_CPU > 72000000
@@ -328,9 +335,10 @@ void HAL_adc_init() {
     adc.setSampleRate(ADC_SMPR_41_5); // 41.5 ADC cycles
   #endif
   adc.setPins((uint8_t *)adc_pins, ADC_PIN_COUNT);
-  adc.setDMA(HAL_adc_results, (uint16_t)ADC_PIN_COUNT, (uint32_t)(DMA_MINC_MODE | DMA_CIRC_MODE), nullptr);
+   adc.setDMA(HAL_adc_results, (uint16_t)ADC_PIN_COUNT, (uint32_t)(DMA_MINC_MODE | DMA_CIRC_MODE), nullptr);
   adc.setScanMode();
   adc.setContinuous();
+  delay(20);
   adc.startConversion();
 }
 
@@ -394,7 +402,31 @@ void HAL_adc_start_conversion(const uint8_t adc_pin) {
   HAL_adc_result = (HAL_adc_results[(int)pin_index] >> 2) & 0x3FF; // shift to get 10 bits only.
 }
 
-uint16_t HAL_adc_get_result() { return HAL_adc_result; }
+uint32_t temp_HAL_adc_result1[50],temp_HAL_adc_result2,temp;
+uint8_t NN,i,j;
+uint16_t HAL_adc_get_result() {
+
+  for(NN=0;NN<50;NN++)
+  {
+      temp_HAL_adc_result1[NN]=HAL_adc_result;
+  }
+  for(i=0;i<49;i++)
+  {
+      for(j=0;j<49-i;j++)
+      {
+          if(temp_HAL_adc_result1[j]>temp_HAL_adc_result1[j+1])
+          {
+                temp=temp_HAL_adc_result1[j];
+                temp_HAL_adc_result1[j]=temp_HAL_adc_result1[j+1];
+                temp_HAL_adc_result1[j+1]=temp;  
+          }
+      }
+  }
+  for(i=10;i<40;i++)  
+  {
+      temp_HAL_adc_result2+=temp_HAL_adc_result1[i];
+  }
+   return temp_HAL_adc_result2/30;}
 
 uint16_t analogRead(pin_t pin) {
   const bool is_analog = _GET_MODE(pin) == GPIO_INPUT_ANALOG;

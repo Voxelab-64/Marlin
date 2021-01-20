@@ -103,12 +103,15 @@ class TFilamentMonitor : public FilamentMonitorBase {
       if ( enabled && !filament_ran_out
         && (printingIsActive() || TERN0(ADVANCED_PAUSE_FEATURE, did_pause_print))
       ) {
+        
         TERN_(HAS_FILAMENT_RUNOUT_DISTANCE, cli()); // Prevent RunoutResponseDelayed::block_completed from accumulating here
         response.run();
         sensor.run();
         const bool ran_out = response.has_run_out();
+      
         TERN_(HAS_FILAMENT_RUNOUT_DISTANCE, sei());
         if (ran_out) {
+          
           filament_ran_out = true;
           event_filament_runout();
           planner.synchronize();
@@ -225,6 +228,7 @@ class FilamentSensorBase {
 
       static inline void run() {
         const bool out = poll_runout_state(active_extruder);
+        
         if (!out) filament_present(active_extruder);
         #ifdef FILAMENT_RUNOUT_SENSOR_DEBUG
           static bool was_out = false;

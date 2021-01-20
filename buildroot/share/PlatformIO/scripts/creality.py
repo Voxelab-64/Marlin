@@ -15,3 +15,11 @@ for i, flag in enumerate(env['LINKFLAGS']):
         env['LINKFLAGS'][i] = "-Wl,-T" + custom_ld_script
     elif flag == "-T":
         env['LINKFLAGS'][i + 1] = custom_ld_script
+
+env.AddPostAction(
+    "$BUILD_DIR/${PROGNAME}.elf",
+    env.VerboseAction(" ".join([
+        "$OBJCOPY", "-O", "ihex", "-R", ".eeprom",
+        "$BUILD_DIR/${PROGNAME}.elf", "$BUILD_DIR/${PROGNAME}.hex"
+    ]), "Building $BUILD_DIR/${PROGNAME}.hex")
+)

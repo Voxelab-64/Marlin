@@ -1015,7 +1015,7 @@ void Temperature::manage_heater() {
 
   if (TERN0(EMERGENCY_PARSER, emergency_parser.killed_by_M112))
   {
-     SERIAL_ECHO_MSG("temp_error1212121");
+   
     kill(M112_KILL_STR, nullptr, true);
   }
   if (!raw_temps_ready) return;
@@ -1041,7 +1041,7 @@ void Temperature::manage_heater() {
       #if ENABLED(THERMAL_PROTECTION_HOTENDS)
         if (degHotend(e) > temp_range[e].maxtemp)
         {
-           SERIAL_ECHO_MSG("temp_error1212121");
+        
           _temp_error((heater_ind_t)e, str_t_thermal_runaway, GET_TEXT(MSG_THERMAL_RUNAWAY));
 
         }
@@ -1098,7 +1098,7 @@ void Temperature::manage_heater() {
     #if ENABLED(THERMAL_PROTECTION_BED)
       if (degBed() > BED_MAXTEMP)
       {
-         SERIAL_ECHO_MSG("temp_error1212121");
+  
         _temp_error(H_BED, str_t_thermal_runaway, GET_TEXT(MSG_THERMAL_RUNAWAY));
       }
     #endif

@@ -55,7 +55,6 @@ void BLTouch::init(const bool set_voltage/*=false*/) {
   //               At power on, the probe will default to the eeprom settings configured by the user
   _reset();
   _stow();
-
   #if ENABLED(BLTOUCH_FORCE_MODE_SET)
 
     constexpr bool should_set = true;
@@ -117,6 +116,7 @@ bool BLTouch::deploy_proc() {
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("BLTouch Recovery Failed");
 
       SERIAL_ERROR_MSG(STR_STOP_BLTOUCH);  // Tell the user something is wrong, needs action
+      
       stop();                              // but it's not too bad, no need to kill, allow restart
 
       return true;                         // Tell our caller we goofed in case he cares to know
@@ -160,6 +160,7 @@ bool BLTouch::stow_proc() {
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("BLTouch Recovery Failed");
 
       SERIAL_ERROR_MSG(STR_STOP_BLTOUCH);  // Tell the user something is wrong, needs action
+    
       stop();                              // but it's not too bad, no need to kill, allow restart
 
       return true;                         // Tell our caller we goofed in case he cares to know

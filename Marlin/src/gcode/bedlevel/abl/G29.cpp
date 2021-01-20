@@ -671,7 +671,7 @@ G29_TYPE GcodeSuite::G29() {
 
             z_values[meshCount.x][meshCount.y] = measured_z + zoffset;
             TERN_(EXTENSIBLE_UI, ExtUI::onMeshUpdate(meshCount, z_values[meshCount.x][meshCount.y]));
-
+            TERN_(DWIN_CREALITY_LCD,BLtouch_detecting(meshCount.x,meshCount.y));
           #endif
 
           abl_should_enable = false;

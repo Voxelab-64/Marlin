@@ -114,7 +114,6 @@ void PrintJobRecovery::check() {
     if (!valid()) return cancel();
     queue.inject_P(PSTR("M1000 S"));
     TERN_(DWIN_CREALITY_LCD, dwin_flag = true);
-     SERIAL_ECHOLNPAIR("dwin_flag12121212: ",dwin_flag);
   }
 }
 

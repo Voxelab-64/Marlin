@@ -882,7 +882,6 @@ void setup() {
     #define SETUP_LOG(...) NOOP
   #endif
   #define SETUP_RUN(C) do{ SETUP_LOG(STRINGIFY(C)); C; }while(0)
-
   #if EITHER(DISABLE_DEBUG, DISABLE_JTAG)
     // Disable any hardware debug to free up pins for IO
     #if ENABLED(DISABLE_DEBUG) && defined(JTAGSWD_DISABLE)
@@ -893,7 +892,6 @@ void setup() {
       #error "DISABLE_(DEBUG|JTAG) is not supported for the selected MCU/Board."
     #endif
   #endif
-
   #if NUM_SERIAL > 0
     MYSERIAL0.begin(BAUDRATE);
     uint32_t serial_connect_timeout = millis() + 1000UL;
@@ -906,8 +904,7 @@ void setup() {
     SERIAL_ECHO_MSG("start");
   #endif
 
-  SETUP_RUN(HAL_init());
-
+   SETUP_RUN(HAL_init());
   #if HAS_L64XX
     SETUP_RUN(L64xxManager.init());  // Set up SPI, init drivers
   #endif
@@ -918,6 +915,7 @@ void setup() {
 
   #if HAS_FILAMENT_SENSOR
     SETUP_RUN(runout.setup());
+    queue.inject_P(PSTR("M412 S1"));
   #endif
 
   #if ENABLED(POWER_LOSS_RECOVERY)
@@ -1029,6 +1027,7 @@ void setup() {
 
   #if HAS_Z_SERVO_PROBE
     SETUP_RUN(probe.servo_probe_init());
+    queue.inject_P(PSTR("M420 S1"));
   #endif
 
   #if HAS_PHOTOGRAPH
@@ -1047,7 +1046,7 @@ void setup() {
   #endif
 
   #if HAS_BED_PROBE
-    SETUP_RUN(endstops.enable_z_probe(false));
+    SETUP_RUN(endstops.enable_z_probe(true));
   #endif
 
   #if HAS_STEPPER_RESET
@@ -1175,7 +1174,12 @@ void setup() {
     const uint8_t err = BL24CXX::check();
     SERIAL_ECHO_TERNARY(err, "BL24CXX Check ", "failed", "succeeded", "!\n");
   #endif
-
+  
+  filament_flag_select();
+  if(filament_flag!=0&&filament_flag!=1)
+  {
+      set_no_filament();
+  }
   #if ENABLED(DWIN_CREALITY_LCD)
     Encoder_Configuration();
     HMI_Init();
@@ -1201,7 +1205,6 @@ void setup() {
   #endif
 
   marlin_state = MF_RUNNING;
-
   SETUP_LOG("setup() completed.");
 }
 
@@ -1221,8 +1224,6 @@ void setup() {
 void loop() {
   do {
     idle();
-//  test_led();
- 
     #if ENABLED(SDSUPPORT)
       card.checkautostart();
       if (card.flag.abort_sd_printing) abortSDPrinting(); 
